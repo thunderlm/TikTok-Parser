@@ -4,4 +4,4 @@
 > pip install -U selenium
 
 ## Run:
-> python main.py
+> python src/main.py --tag "TAGNAME"
