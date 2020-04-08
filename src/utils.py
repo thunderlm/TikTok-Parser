@@ -32,19 +32,25 @@ def getDriver(path):
 	
 	return driver
 
-
-def scrollPage(driver):
-	
+#TODO: Handle errors in loading
+def scrollPage(driver, scope, n=5):
+	if scope == "tag":
+		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div/div"
+	elif scope == "author":
+		fullXPath = "SOMETHING"
+	else:
+		raise NameError('scope variable must be either tag or author')
+        
+	#TODO: Change place for these. Why not top?
 	from selenium.webdriver.common.by import By
 	from selenium.webdriver.support.ui import WebDriverWait as wait
 	from selenium.webdriver.support import expected_conditions as EC
-	fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div/div"
+	
 
 	#Wait for first videos to load:
 	wait(driver, 10).until(EC.presence_of_element_located((By.XPATH, fullXPath)))
 	# Load ~30 new videos n times:
 	max_seconds_wait = 10
-	n = 5
 	for i in range(1,n+1):
 		driver.execute_script("window.scrollTo(0, 1e6)")
 		n_videos = ((i+1)*30)-15    

@@ -14,8 +14,8 @@ def main(tagName):
 	# Get tag URL
 	tagDriver.get('https://www.tiktok.com/tag/' + tagName)
 
-	# Scroll
-	login_form = utils.scrollPage(tagDriver)
+	# Scroll in tags
+	login_form = utils.scrollPage(tagDriver, scope="tag")
     
     #Get authors names:
 	authors_list = utils.get_authors(login_form, verbose = True)
