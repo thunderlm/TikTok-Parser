@@ -10,14 +10,19 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.firefox.options import Options
 
-#from selenium.webdriver.chrome.options import Options
+# Options
+options = Options()
+options.headless = True
 
-
+# Profile
 profile = webdriver.FirefoxProfile()
 profile.set_preference("general.useragent.override", "Naverbot")
-driver = webdriver.Firefox(profile,executable_path=r'/home/andrea/Documents/WEB-CRAWLER/geckodriver-v0.26.0-linux64/geckodriver')
+driver = webdriver.Firefox(profile, options=options, executable_path=r'./geckodriver')
 
+
+# Get URL
 driver.get('https://www.tiktok.com/tag/magic')
 
 
