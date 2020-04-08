@@ -15,7 +15,7 @@ def main(tagName):
 	tagDriver.get('https://www.tiktok.com/tag/' + tagName)
 
 	# Scroll
-	#utils.scrollPage(tagDriver)
+	utils.scrollPage(tagDriver)
 
 
 
