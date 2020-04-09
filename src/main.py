@@ -1,28 +1,41 @@
 import utils
 import argparse
 
+#TODO: What if tags shows no results (for example mispell)? -> wait error
+#      Is it better maybe to write in a doc the basic settings?
+#      Give possibility to continue scraping of infinitly?
+#      Change driver randomly?
+#      Maybe save (intermediate) results?
+#	   Start now with "metrics" function? (Ma se non le sappiamo ancora..)
+#	   Sistemare i verbose
 
+def main(tagNames, prams, verbose=False):
 
-def main(tagName, minNFollowers, maxNFollowers, minNLikes, maxNLikes):
-
+	#Initialize 
+	stats_authors = dict()
+	
 	# Get current location
 	path = utils.getPath()
 
 	# Get selenium driver
 	driver = utils.getDriver(path)
+	
+	#Get all the tags:
+	tagNameList = utils.get_names_tags(tagNames)
 
-	# Get tag URL
-	driver.get('https://www.tiktok.com/tag/' + tagName)
-
-	# Scroll in tags
-	login_form = utils.scrollPage(driver, scope="tag")
-    
-    #Get authors names:
-	authors_list = utils.get_authors(login_form)
-
-	#Extract statistics from each author:		
-	params = [minNFollowers, maxNFollowers, minNLikes, maxNLikes]
-	stats_authors = utils.get_stats_author(driver, authors_list, params)
+	for tagName in tagNameList:
+	
+		# Get tag URL
+		driver.get('https://www.tiktok.com/tag/' + tagName)
+	
+		# Scroll in tags
+		login_form = utils.scrollPage(driver, scope="tag", n =1)
+	    
+	    #Get authors names:
+		authors_list = utils.get_authors(login_form)
+	
+		#Extract statistics from each author:		
+		stats_authors = utils.get_stats_author(driver, authors_list, params, stats_authors)
 
 
 	# Scroll videos
@@ -58,5 +71,6 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	
 	# Run main
-	main(args.tag, args.minNFollowers, args.maxNFollowers, args.minNLikes, args.maxNLikes)
+	params = args.minNFollowers, args.maxNFollowers, args.minNLikes, args.maxNLikes
+	main(args.tag, params)
 
