@@ -33,11 +33,11 @@ def getDriver(path):
 	return driver
 
 #TODO: Handle errors in loading
-def scrollPage(driver, scope, n=5):
+def scrollPage(driver, scope, n=2):
 	if scope == "tag":
 		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div/div"
 	elif scope == "author":
-		fullXPath = "SOMETHING"
+		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div/div"
 	else:
 		raise NameError('scope variable must be either tag or author')
         
@@ -63,7 +63,7 @@ def scrollPage(driver, scope, n=5):
 	login_form = driver.find_elements_by_xpath(fullXPath)
 	return login_form
 
-def get_authors(login_form, verbose = False):
+def get_authors(login_form, verbose=False):
 	list_authors = []
 	for element in login_form:
 		#Currently the video link is in the element a
@@ -83,3 +83,25 @@ def get_authors(login_form, verbose = False):
         
 	return list_authors
     
+
+def getLinkVideos(page):
+	linkVideos = []
+	for element in page:
+		elementFiltered = element.find_elements_by_tag_name('a')
+		assert(len(elementFiltered) == 1)
+		linkVideos.append(elementFiltered[0].get_attribute('href'))
+
+	assert(len(linkVideos) == len(list(set(linkVideos))))
+	return linkVideos
+		
+
+def convertStatsToNumber(numbers):
+	for i in range(len(numbers)):
+		if numbers[i][-1] == "K":
+			numbers[i] = int(float(numbers[i][:-1]) * 1e3)
+		elif numbers[i][-1] == "M":
+			numbers[i] = int(float(numbers[i][:-1]) * 1e6)
+		else:
+			numbers[i] = int(numbers[i])
+
+	return numbers
