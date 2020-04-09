@@ -5,9 +5,6 @@ import argparse
 
 def main(tagName, minNFollowers, maxNFollowers, minNLikes, maxNLikes):
 
-	# Statistics
-	allStats = dict()
-
 	# Get current location
 	path = utils.getPath()
 
@@ -23,46 +20,25 @@ def main(tagName, minNFollowers, maxNFollowers, minNLikes, maxNLikes):
     #Get authors names:
 	authors_list = utils.get_authors(login_form)
 
-	for authorName in authors_list:
-		# Request author page
-		driver.get('https://www.tiktok.com/@' + authorName)
-
-		# Get profile numbers like followers, following, N likes
-		profileNumbers = driver.find_elements_by_class_name("number")
-		assert(len(profileNumbers) == 3)
-
-		# Convert stat strings to number and save in variables
-		numbers = utils.convertStatsToNumber([element.text for element in profileNumbers])
-		numFollowing = numbers[0]
-		numFollowers = numbers[1]
-		numLikes = numbers[2]
-
-		# Skip if not microinfluencer
-		if numFollowers < minNFollowers or numFollowers > maxNFollowers or numLikes < minNLikes or numLikes > maxNLikes:
-			continue
-
-		# Add profile to statistics
-		if not authorName in allStats:
-			allStats[authorName] = dict()
-			allStats[authorName]["Following"] = numFollowing
-			allStats[authorName]["Followers"] = numFollowers
-			allStats[authorName]["NLikes"] = numLikes
+	#Extract statistics from each author:		
+	params = [minNFollowers, maxNFollowers, minNLikes, maxNLikes]
+	stats_authors = utils.get_stats_author(driver, authors_list, params)
 
 
-		# Scroll videos
-		'''profileVideos = utils.scrollPage(driver, scope="author")
+	# Scroll videos
+	'''profileVideos = utils.scrollPage(driver, scope="author")
 
-		# Get video links
-		linkVideos = utils.getLinkVideos(profileVideos)
-		print(linkVideos)'''
+	# Get video links
+	linkVideos = utils.getLinkVideos(profileVideos)
+	print(linkVideos)'''
 
 
 
-	print(allStats)
+	print(stats_authors)
 
 	# Close drivers
 	driver.close()
-
+	driver.quit() 
 
 
 

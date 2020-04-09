@@ -1,6 +1,9 @@
 import os
 from selenium.webdriver.firefox.options import Options
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait as wait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 def extract_author_from_link(link_video, verbose = False):
@@ -41,12 +44,6 @@ def scrollPage(driver, scope, n=2):
 	else:
 		raise NameError('scope variable must be either tag or author')
         
-	#TODO: Change place for these. Why not top?
-	from selenium.webdriver.common.by import By
-	from selenium.webdriver.support.ui import WebDriverWait as wait
-	from selenium.webdriver.support import expected_conditions as EC
-	
-
 	#Wait for first videos to load:
 	wait(driver, 10).until(EC.presence_of_element_located((By.XPATH, fullXPath)))
 	# Load ~30 new videos n times:
@@ -83,6 +80,37 @@ def get_authors(login_form, verbose=False):
         
 	return list_authors
     
+def get_stats_author(driver, authors_list, params):
+	
+	minNFollowers, maxNFollowers, minNLikes, maxNLikes = params
+	allStats = dict()
+	for authorName in authors_list:
+		# Request author page
+		driver.get('https://www.tiktok.com/@' + authorName)
+		
+		print("Fetching info of ",authorName)
+		# Get profile numbers like followers, following, likes
+		wait(driver, 10).until(lambda driver: len(driver.find_elements_by_class_name("number")) ==3)
+		profileNumbers = driver.find_elements_by_class_name("number")
+		assert(len(profileNumbers) == 3)
+
+		# Convert stat strings to number and save in variables
+		numbers = convertStatsToNumber([element.text for element in profileNumbers])
+		numFollowing = numbers[0]
+		numFollowers = numbers[1]
+		numLikes = numbers[2]
+
+		# Skip if not microinfluencer
+		if numFollowers < minNFollowers or numFollowers > maxNFollowers or numLikes < minNLikes or numLikes > maxNLikes:
+			continue
+
+		# Add profile to statistics			
+		allStats[authorName] = dict()
+		allStats[authorName]["Following"] = numFollowing
+		allStats[authorName]["Followers"] = numFollowers
+		allStats[authorName]["NLikes"] = numLikes
+		
+	return allStats
 
 def getLinkVideos(page):
 	linkVideos = []
