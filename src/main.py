@@ -1,6 +1,6 @@
 import utils
 import traceback
-
+import selenium_functions as sf
 
 #TODO: What if tags shows no results (for example mispell)? -> wait error
 #      Is it better maybe to write in a doc the basic settings?
@@ -21,7 +21,7 @@ def main(verbose=False):
 		params = utils.loadJson(path + "/docs/parameters.json")
 
 		# Get selenium driver
-		driver = utils.getDriver(path)
+		driver = sf.getDriver(path)
 
 		# Iterate over tags
 		for tagName in params["tags"]:
@@ -29,13 +29,13 @@ def main(verbose=False):
 			driver.get('https://www.tiktok.com/tag/' + tagName)
 			
 			# Scroll in tags
-			login_form = utils.scrollPage(driver, scope="tag", n =1)
+			login_form = sf.scrollPage(driver, scope="tag", n =1)
 		    
 		    #Get authors names:
-			authors_list = utils.get_authors(login_form)
+			authors_list = sf.get_authors(login_form)
 		
 			#Extract statistics from each author:		
-			stats_authors = utils.get_stats_author(driver, authors_list, params, stats_authors)
+			stats_authors = sf.get_stats_author(driver, authors_list, params, stats_authors)
 
 
 		# Scroll videos
