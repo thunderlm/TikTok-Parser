@@ -24,6 +24,9 @@ def get_names_tags(tagNames):
 
 
 def extract_author_from_link(link_video):
+	if "@" not in link_video:
+		print("WARNING: Could not find @ in link, hence no username")
+		return None
 	cropped_link = link_video[link_video.find("@")+1:]
 	author_name = cropped_link[:cropped_link.find("/")]
 	return author_name
@@ -104,7 +107,10 @@ def get_authors(login_form, verbose=False):
             
 		link_video = element_filtered[0].get_attribute('href')
 		author = extract_author_from_link(link_video)
-		list_authors.append(author)
+		#Add to author list if there was no problems extracting the name:
+		if author is not None:
+			list_authors.append(author)
+
     #remove authors repetitions
 	#list_authors = list(set(list_authors)) 
     
