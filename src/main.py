@@ -1,5 +1,4 @@
 import utils
-import argparse
 import traceback
 
 
@@ -11,7 +10,7 @@ import traceback
 #	   Start now with "metrics" function? (Ma se non le sappiamo ancora..)
 #	   Sistemare i verbose
 
-def main(tagNames, prams, verbose=False):
+def main(verbose=False):
 
 	try:
 		#Initialize 
@@ -19,18 +18,16 @@ def main(tagNames, prams, verbose=False):
 		
 		# Get current location
 		path = utils.getPath()
+		params = utils.loadJson(path + "/docs/parameters.json")
 
 		# Get selenium driver
 		driver = utils.getDriver(path)
 
-		#Get all the tags:
-		tagNameList = utils.get_names_tags(tagNames)
-
-		for tagName in tagNameList:
-		
+		# Iterate over tags
+		for tagName in params["tags"]:
 			# Get tag URL
 			driver.get('https://www.tiktok.com/tag/' + tagName)
-		
+			
 			# Scroll in tags
 			login_form = utils.scrollPage(driver, scope="tag", n =1)
 		    
@@ -69,17 +66,4 @@ def main(tagNames, prams, verbose=False):
 
 
 if __name__ == "__main__":
-
-	# Arguments
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--tag', type=str, required=True)
-	parser.add_argument('--minNFollowers', type=int, required=True)
-	parser.add_argument('--maxNFollowers', type=int, required=True)
-	parser.add_argument('--minNLikes', type=int, required=True)
-	parser.add_argument('--maxNLikes', type=int, required=True)
-	args = parser.parse_args()
-	
-	# Run main
-	params = args.minNFollowers, args.maxNFollowers, args.minNLikes, args.maxNLikes
-	main(args.tag, params)
-	
+	main()

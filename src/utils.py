@@ -1,46 +1,36 @@
 import os
+import json
 from selenium.webdriver.firefox.options import Options
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
 
+
+'''
+	Global variables
+'''
 MAX_WAIT = 10
 
-def get_names_tags(tagNames):
-	#If it is a single word:
-	if "," not in tagNames:
-		return [tagNames]
-	#If multiple words (separated by a comma)
-	tagNameList = []
-	while True:
-		index = tagNames.find(",")		
-		if index == -1:
-			tagNameList.append(tagNames)
-			return tagNameList
 
-		tagNameList.append(tagNames[:index])
-		tagNames = tagNames[index+1:]
-
-
-def extract_author_from_link(link_video):
-	if "@" not in link_video:
-		print("WARNING: Could not find @ in link, hence no username")
-		return None
-	cropped_link = link_video[link_video.find("@")+1:]
-	author_name = cropped_link[:cropped_link.find("/")]
-	return author_name
-
-
+'''
+	Useful functions
+'''
 def getPath():
 	path = os.getcwd()
-
 	# Run script main from main folder, NOT FROM src
 	assert(path.split("/")[-1] == "TikTok-Parser")
-	
 	return path
 
 
+def loadJson(path):
+	with open(path) as json_file:
+		return json.load(json_file)
+
+
+'''
+	Selenium
+'''
 def getDriver(path):
 
 	# Options
@@ -70,6 +60,17 @@ def getDriver(path):
 	
 	return driver
 
+
+def extract_author_from_link(link_video):
+	if "@" not in link_video:
+		print("WARNING: Could not find @ in link, hence no username")
+		return None
+	cropped_link = link_video[link_video.find("@")+1:]
+	author_name = cropped_link[:cropped_link.find("/")]
+	return author_name
+
+
+
 #TODO: Handle errors in loading
 def scrollPage(driver, scope, n=2):
 	if scope == "tag":
@@ -96,6 +97,7 @@ def scrollPage(driver, scope, n=2):
 	login_form = driver.find_elements_by_xpath(fullXPath)
 	return login_form
 
+
 def get_authors(login_form, verbose=False):
 	list_authors = []
 	for element in login_form:
@@ -119,9 +121,9 @@ def get_authors(login_form, verbose=False):
         
 	return list_authors
     
+
 def get_stats_author(driver, authors_list, params, allStats):
 	
-	minNFollowers, maxNFollowers, minNLikes, maxNLikes = params
 	for authorName in authors_list:
 		#If author already in allStats, increase TagCount and skip to next:
 		if authorName in allStats:
@@ -148,7 +150,7 @@ def get_stats_author(driver, authors_list, params, allStats):
 		numLikes = numbers[2]
 
 		# Skip if not microinfluencer
-		if numFollowers < minNFollowers or numFollowers > maxNFollowers or numLikes < minNLikes or numLikes > maxNLikes:
+		if numFollowers < params["minNFollowers"] or numFollowers > params["maxNFollowers"] or numLikes < params["minNLikes"] or numLikes > params["maxNLikes"]:
 			continue
 
 		# Add profile to statistics			
@@ -160,6 +162,7 @@ def get_stats_author(driver, authors_list, params, allStats):
 		
 		
 	return allStats
+
 
 def getLinkVideos(page):
 	linkVideos = []
