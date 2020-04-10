@@ -106,9 +106,21 @@ def get_stats_author(driver, authors_list, params, allStats):
 	
 	for authorName in authors_list:
 		#If author already in allStats, increase TagCount and skip to next:
-		if authorName in allStats:
+		if authorName in allStats and allStats[authorName]["Candidate"]:
 			allStats[authorName]["TagCount"] += 1
 			continue
+		
+		# Try to use Tikster to send less requests to TikTok
+		success, vals = get_tikster_author(driver, authorName)
+		#If you managed to get it but didn't pass the tresholds, skip to next
+		if success :
+			numFollowing, numFollowers, numLikes = vals
+			if numFollowers < params["minNFollowers"] or numFollowers > params["maxNFollowers"] or numLikes < params["minNLikes"] or numLikes > params["maxNLikes"]:
+				allStats[authorName] = dict()
+				allStats[authorName]["Candidate"] = False
+				print("Skipped user thanks to Tikster")
+				continue			
+		
 		# Request author page
 		driver.get('https://www.tiktok.com/@' + authorName)
 		
@@ -178,3 +190,24 @@ def compute_metrics(stats_authors):
 		stats_authors[authorName]["AverageViews"] = sum(authorStats["ViewsSerie"])/authorStats["NVideos"]
 			
 	return stats_authors
+
+def get_tikster_author(driver, authorName):
+	fullXPath = "/html/body/div/div/div[2]/div[1]/div[2]/div/div/div/div"	
+	driver.get('https://app.tikster.net/#/user/' + authorName)	
+	try:
+		wait(driver, MAX_WAIT).until(EC.presence_of_element_located((By.XPATH, fullXPath+"[1]")))
+		string = driver.find_elements_by_xpath(fullXPath+"[1]")[0].text
+		numFollowing = int(string[:string.find("\n")].replace(",","") )
+
+		string = driver.find_elements_by_xpath(fullXPath+"[2]")[0].text
+		numFollowers = int(string[:string.find("\n")].replace(",",""))
+
+		string = driver.find_elements_by_xpath(fullXPath+"[3]")[0].text
+		numLikes = int(string[:string.find("\n")].replace(",",""))
+		
+		print("Did it:",numFollowing, numFollowers, numLikes)
+		return True, [numFollowing, numFollowers, numLikes]
+		
+	except Exception as e:
+		print("Tikster didn't load in time, falling back to TikTok")
+		return False, None
