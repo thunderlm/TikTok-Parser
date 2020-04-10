@@ -22,7 +22,7 @@ def main(tagNames, prams, verbose=False):
 
 		# Get selenium driver
 		driver = utils.getDriver(path)
-		
+
 		#Get all the tags:
 		tagNameList = utils.get_names_tags(tagNames)
 
@@ -63,8 +63,8 @@ def main(tagNames, prams, verbose=False):
 		# Always close drivers
 		if not driver is None:
 			driver.close()
-			driver.quit() 
-
+			driver.quit()
+			print("Driver closed")
 
 
 
