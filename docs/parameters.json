@@ -1,7 +1,7 @@
 {
 	"tags" : ["nichie"],
-	"minNFollowers" : 1,
+	"minNFollowers" : 5000,
 	"maxNFollowers" : 1000000000,
-	"minNLikes" : 1,
+	"minNLikes" : 5000,
 	"maxNLikes" : 100000000000
 }
