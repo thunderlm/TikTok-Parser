@@ -54,7 +54,6 @@ def scrollPage(driver, scope, n=2):
 		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div/div"
 	elif scope == "author":
 		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div/div"
-#		//*[@id="main"]/div[2]/div/div[1]/div/main/div/div[1]/div/div/div/a/div/div/div/div/div/span
 	else:
 		raise NameError('scope variable must be either tag or author')
         
@@ -132,20 +131,22 @@ def get_stats_author(driver, authors_list, params, allStats):
 
 		# Skip if not microinfluencer
 		if numFollowers < params["minNFollowers"] or numFollowers > params["maxNFollowers"] or numLikes < params["minNLikes"] or numLikes > params["maxNLikes"]:
+			allStats[authorName] = dict()
+			allStats[authorName]["Candidate"] = False
 			continue
 
 		# Get views:
-        #TODO: Should scroll till the end!
+        #TODO: Should scroll till the end
 		profileVideos = scrollPage(driver, scope="author", n=1) 
 		numberVideos = len(profileVideos)
 		viewsVideos = []
 		for video in profileVideos:
 			views_count = video.find_elements_by_tag_name('span')
 			assert len(views_count) ==1
-			viewsVideos.append(views_count[0].text)
+			string_number = views_count[0].text
+			converted_number = convertStatsToNumber([string_number])[0]
+			viewsVideos.append(converted_number)
 			
-
-
 		# Scroll videos
 		'''
 		# Get video links
@@ -155,30 +156,25 @@ def get_stats_author(driver, authors_list, params, allStats):
 
 		# Add profile to statistics			
 		allStats[authorName] = dict()
+		allStats[authorName]["Candidate"] = True
 		allStats[authorName]["Following"] = numFollowing
 		allStats[authorName]["Followers"] = numFollowers
 		allStats[authorName]["NLikes"] = numLikes
 		allStats[authorName]["TagCount"] = 1
 		allStats[authorName]["NVideos"] = numberVideos
 		allStats[authorName]["ViewsSerie"] = viewsVideos
-		print(viewsVideos)
 		
 	return allStats
 
 def compute_metrics(stats_authors):
-	
+	#Keep only the possible candidates:
+	stats_authors = {s:stats_authors[s] for s in stats_authors if stats_authors[s]["Candidate"]}
+	#Compute (more complex) metrics:
 	for authorName, authorStats in stats_authors.items():
 		stats_authors[authorName]["Following-Followers Ratio"] = float(authorStats["Following"])/authorStats["Followers"]
-		
-
+		stats_authors[authorName]["TotViews"]	 = sum(authorStats["ViewsSerie"])
+		stats_authors[authorName]["Views-Followers Ratio"] = float(authorStats["Followers"])/authorStats["TotViews"]
+		stats_authors[authorName]["AverageLikes"] = float(authorStats["NLikes"])/authorStats["NVideos"]
+		stats_authors[authorName]["AverageViews"] = sum(authorStats["ViewsSerie"])/authorStats["NVideos"]
+			
 	return stats_authors
-		
-#TODO 		stats_authors[authorName]["Comments"]
-#TODO 		stats_authors[authorName]["TotViews"]	
-	
-	
-	
-	
-	
-	
-	
