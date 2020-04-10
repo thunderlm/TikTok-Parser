@@ -10,6 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
 from utils import extract_author_from_link, convertStatsToNumber
+import time 
 
 #	Global variables
 MAX_WAIT = 10
@@ -53,6 +54,7 @@ def scrollPage(driver, scope, n=2):
 		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div/div"
 	elif scope == "author":
 		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div/div"
+#		//*[@id="main"]/div[2]/div/div[1]/div/main/div/div[1]/div/div/div/a/div/div/div/div/div/span
 	else:
 		raise NameError('scope variable must be either tag or author')
         
@@ -63,7 +65,11 @@ def scrollPage(driver, scope, n=2):
 	for i in range(1,n+1):
 		driver.execute_script("window.scrollTo(0, 1e6)")
 		n_videos = ((i+1)*30)-15    
-		wait(driver, MAX_WAIT).until(lambda driver: len(driver.find_elements_by_xpath(fullXPath)) > n_videos-1)
+		#Current pezza because devo pensare come fare
+		if scope == "tag":
+			wait(driver, MAX_WAIT).until(lambda driver: len(driver.find_elements_by_xpath(fullXPath)) > n_videos-1)
+		else:
+			time.sleep(5)
 		#time.sleep(1) #Are we sure we don't need this?
 		login_form = driver.find_elements_by_xpath(fullXPath)
 		print("current_length:",len(login_form),"min_length:",n_videos)
@@ -128,12 +134,51 @@ def get_stats_author(driver, authors_list, params, allStats):
 		if numFollowers < params["minNFollowers"] or numFollowers > params["maxNFollowers"] or numLikes < params["minNLikes"] or numLikes > params["maxNLikes"]:
 			continue
 
+		# Get views:
+        #TODO: Should scroll till the end!
+		profileVideos = scrollPage(driver, scope="author", n=1) 
+		numberVideos = len(profileVideos)
+		viewsVideos = []
+		for video in profileVideos:
+			views_count = video.find_elements_by_tag_name('span')
+			assert len(views_count) ==1
+			viewsVideos.append(views_count[0].text)
+			
+
+
+		# Scroll videos
+		'''
+		# Get video links
+		linkVideos = utils.getLinkVideos(profileVideos)
+		print(linkVideos)'''
+		
+
 		# Add profile to statistics			
 		allStats[authorName] = dict()
 		allStats[authorName]["Following"] = numFollowing
 		allStats[authorName]["Followers"] = numFollowers
 		allStats[authorName]["NLikes"] = numLikes
 		allStats[authorName]["TagCount"] = 1
+		allStats[authorName]["NVideos"] = numberVideos
+		allStats[authorName]["ViewsSerie"] = viewsVideos
+		print(viewsVideos)
 		
 	return allStats
 
+def compute_metrics(stats_authors):
+	
+	for authorName, authorStats in stats_authors.items():
+		stats_authors[authorName]["Following-Followers Ratio"] = float(authorStats["Following"])/authorStats["Followers"]
+		
+
+	return stats_authors
+		
+#TODO 		stats_authors[authorName]["Comments"]
+#TODO 		stats_authors[authorName]["TotViews"]	
+	
+	
+	
+	
+	
+	
+	

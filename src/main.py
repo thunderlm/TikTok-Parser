@@ -37,15 +37,11 @@ def main(verbose=False):
 			#Extract statistics from each author:		
 			stats_authors = sf.get_stats_author(driver, authors_list, params, stats_authors)
 
+			#Compute metrics for each author:
+			metrics_author = sf.compute_metrics(stats_authors)
 
-		# Scroll videos
-		'''profileVideos = utils.scrollPage(driver, scope="author")
 
-		# Get video links
-		linkVideos = utils.getLinkVideos(profileVideos)
-		print(linkVideos)'''
-
-		print(stats_authors)
+		print(metrics_author)
 
 	except Exception as e:
 		traceback.print_exc()
