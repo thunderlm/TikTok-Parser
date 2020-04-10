@@ -132,7 +132,12 @@ def get_stats_author(driver, authors_list, params, allStats):
 		
 		print("Fetching info of ",authorName)
 		# Get profile numbers like followers, following, likes
-		wait(driver, MAX_WAIT).until(lambda driver: len(driver.find_elements_by_class_name("number")) ==3)
+		try:
+			wait(driver, MAX_WAIT).until(lambda driver: len(driver.find_elements_by_class_name("number")) ==3)
+		except Exception as e:
+			print("Exception : " + str(e) + " " + str(authorName))
+			continue
+			
 		profileNumbers = driver.find_elements_by_class_name("number")
 		assert(len(profileNumbers) == 3)
 
