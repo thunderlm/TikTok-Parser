@@ -1,5 +1,7 @@
 import utils
 import argparse
+import traceback
+
 
 #TODO: What if tags shows no results (for example mispell)? -> wait error
 #      Is it better maybe to write in a doc the basic settings?
@@ -11,50 +13,57 @@ import argparse
 
 def main(tagNames, prams, verbose=False):
 
-	#Initialize 
-	stats_authors = dict()
-	
-	# Get current location
-	path = utils.getPath()
+	try:
+		#Initialize 
+		stats_authors = dict()
+		
+		# Get current location
+		path = utils.getPath()
 
-	# Get selenium driver
-	driver = utils.getDriver(path)
-	
-	#Get all the tags:
-	tagNameList = utils.get_names_tags(tagNames)
+		# Get selenium driver
+		driver = utils.getDriver(path)
+		
+		#Get all the tags:
+		tagNameList = utils.get_names_tags(tagNames)
 
-	for tagName in tagNameList:
-	
-		# Get tag URL
-		driver.get('https://www.tiktok.com/tag/' + tagName)
-	
-		# Scroll in tags
-		login_form = utils.scrollPage(driver, scope="tag", n =1)
-	    
-	    #Get authors names:
-		authors_list = utils.get_authors(login_form)
-	
-		#Extract statistics from each author:		
-		stats_authors = utils.get_stats_author(driver, authors_list, params, stats_authors)
-
-
-	# Scroll videos
-	'''profileVideos = utils.scrollPage(driver, scope="author")
-
-	# Get video links
-	linkVideos = utils.getLinkVideos(profileVideos)
-	print(linkVideos)'''
+		for tagName in tagNameList:
+		
+			# Get tag URL
+			driver.get('https://www.tiktok.com/tag/' + tagName)
+		
+			# Scroll in tags
+			login_form = utils.scrollPage(driver, scope="tag", n =1)
+		    
+		    #Get authors names:
+			authors_list = utils.get_authors(login_form)
+		
+			#Extract statistics from each author:		
+			stats_authors = utils.get_stats_author(driver, authors_list, params, stats_authors)
 
 
+		# Scroll videos
+		'''profileVideos = utils.scrollPage(driver, scope="author")
 
-	print(stats_authors)
+		# Get video links
+		linkVideos = utils.getLinkVideos(profileVideos)
+		print(linkVideos)'''
 
-	# Close drivers
-	driver.close()
-	driver.quit() 
+		print(stats_authors)
 
+	except Exception as e:
+		traceback.print_exc()
 
+	finally:
+		# Check whether driver has been initialized yet
+		try:
+			driver
+		except NameError:
+			driver = None
 
+		# Always close drivers
+		if not driver is None:
+			driver.close()
+			driver.quit() 
 
 
 
@@ -73,4 +82,4 @@ if __name__ == "__main__":
 	# Run main
 	params = args.minNFollowers, args.maxNFollowers, args.minNLikes, args.maxNLikes
 	main(args.tag, params)
-
+	
