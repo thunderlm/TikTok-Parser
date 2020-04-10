@@ -58,6 +58,7 @@ def getDriver(path):
 		'Pragma': 'no-cache'
 	}
 	headersKeys = list(headers.keys())
+	profile.set_preference("modifyheaders.headers.count", len(headersKeys))
 	for i in range(len(headersKeys)):
 		profile.set_preference("modifyheaders.headers.name" + str(i), headersKeys[i])
 		profile.set_preference("modifyheaders.headers.value" + str(i), headers[headersKeys[i]])
