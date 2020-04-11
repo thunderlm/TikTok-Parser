@@ -9,9 +9,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
-from utils import extract_author_from_link, convertStatsToNumber, save_metrics
+from utils import extract_author_from_link, convertStatsToNumber, save_metrics, divide
 import time 
-import json
 
 #	Global variables
 MAX_WAIT = 10
@@ -58,14 +57,20 @@ def scrollPage(driver, scope, maxNScrolls=10):
 
 	last_height = driver.execute_script("return document.body.scrollHeight")
 	i = 0
+	counter = 0 
 	while i < maxNScrolls:
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-		time.sleep(2)
+		time.sleep(1)
 		new_height = driver.execute_script("return document.body.scrollHeight")
 		if new_height == last_height:
-			break
+			counter +=1
+			if counter>2:
+				break
+		else:
+			counter = 0
 		last_height = new_height
 		i += 1
+		 
 
 	login_form = driver.find_elements_by_xpath(fullXPath)
 	return login_form
@@ -99,8 +104,9 @@ def get_stats_author(driver, authors_list, params, allStats, useTikster=True):
 	
 	for authorName in authors_list:
 		#If author already in allStats, increase TagCount and skip to next:
-		if authorName in allStats and allStats[authorName]["Candidate"]:
-			allStats[authorName]["TagCount"] += 1
+		if authorName in allStats:
+			if allStats[authorName]["Candidate"]:
+				allStats[authorName]["TagCount"] += 1
 			continue
 
 		print("Fetching info of ",authorName)
@@ -178,11 +184,11 @@ def compute_metrics(stats_authors):
 	stats_authors = {s:stats_authors[s] for s in stats_authors if stats_authors[s]["Candidate"]}
 	#Compute (more complex) metrics:
 	for authorName, authorStats in stats_authors.items():
-		stats_authors[authorName]["Following-Followers Ratio"] = float(authorStats["Following"])/authorStats["Followers"]
+		stats_authors[authorName]["Following-Followers Ratio"] = divide(authorStats["Following"],authorStats["Followers"])
 		stats_authors[authorName]["TotViews"]	 = sum(authorStats["ViewsSerie"])
-		stats_authors[authorName]["Views-Followers Ratio"] = float(authorStats["Followers"])/authorStats["TotViews"]
-		stats_authors[authorName]["AverageLikes"] = float(authorStats["NLikes"])/authorStats["NVideos"]
-		stats_authors[authorName]["AverageViews"] = sum(authorStats["ViewsSerie"])/authorStats["NVideos"]
+		stats_authors[authorName]["Views-Followers Ratio"] = divide(authorStats["Followers"],authorStats["TotViews"])
+		stats_authors[authorName]["AverageLikes"] = divide(authorStats["NLikes"],authorStats["NVideos"])
+		stats_authors[authorName]["AverageViews"] = divide(sum(authorStats["ViewsSerie"]),authorStats["NVideos"])
 			
 	save_metrics(stats_authors)		
 	   

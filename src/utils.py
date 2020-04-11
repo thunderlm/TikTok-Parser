@@ -54,7 +54,11 @@ def save_metrics(stats_authors, path_save="docs/result_metrics.json"):
 	data_t.to_excel(path_save.replace("json","xlsx"))
 	print("Results saved in", path_save.replace("json","xlsx"))
 	
-	
+def divide(a,b):
+	exact_result = float(a)/(b+1e-5)	
+	#round to two decimals:
+	r =  float("{:.2f}".format(exact_result))
+	return r 
 	
 	
 	

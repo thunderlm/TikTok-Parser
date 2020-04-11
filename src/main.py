@@ -3,11 +3,8 @@ import traceback
 import selenium_functions as sf
 
 #TODO: What if tags shows no results (for example mispell)? -> wait error
-#      Is it better maybe to write in a doc the basic settings?
-#      Give possibility to continue scraping of infinitly?
 #      Change driver randomly?
 #      Maybe save (intermediate) results?
-#	   Start now with "metrics" function? (Ma se non le sappiamo ancora..)
 #	   Sistemare i verbose
 
 def main(verbose=False):
@@ -40,7 +37,7 @@ def main(verbose=False):
 			#Compute metrics for each author:
 			metrics_author = sf.compute_metrics(stats_authors)
 
-		print(metrics_author)
+		#print(metrics_author)
 
 	except Exception as e:
 		traceback.print_exc()
