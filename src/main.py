@@ -29,17 +29,16 @@ def main(verbose=False):
 			driver.get('https://www.tiktok.com/tag/' + tagName)
 			
 			# Scroll in tags
-			login_form = sf.scrollPage(driver, scope="tag", n =1)
+			login_form = sf.scrollPage(driver, scope="tag", maxNScrolls=50)
 		    
 		    #Get authors names:
 			authors_list = sf.get_authors(login_form)
 		
 			#Extract statistics from each author:		
-			stats_authors = sf.get_stats_author(driver, authors_list, params, stats_authors)
+			stats_authors = sf.get_stats_author(driver, authors_list, params, stats_authors, useTikster=False)
 
 			#Compute metrics for each author:
 			metrics_author = sf.compute_metrics(stats_authors)
-
 
 		print(metrics_author)
 

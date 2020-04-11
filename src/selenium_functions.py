@@ -47,33 +47,25 @@ def getDriver(path):
 	return driver
 
 
-
-
-#TODO: Handle errors in loading
-def scrollPage(driver, scope, n=2):
+def scrollPage(driver, scope, maxNScrolls=10):
 	if scope == "tag":
 		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div/div"
 	elif scope == "author":
 		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div/div"
 	else:
 		raise NameError('scope variable must be either tag or author')
-        
-	#Wait for first videos to load:
-	wait(driver, MAX_WAIT).until(EC.presence_of_element_located((By.XPATH, fullXPath)))
-	
-	# Load ~30 new videos n times:
-	for i in range(1,n+1):
-		driver.execute_script("window.scrollTo(0, 1e6)")
-		n_videos = ((i+1)*30)-15    
-		#Current pezza because devo pensare come fare
-		if scope == "tag":
-			wait(driver, MAX_WAIT).until(lambda driver: len(driver.find_elements_by_xpath(fullXPath)) > n_videos-1)
-		else:
-			time.sleep(5)
-		#time.sleep(1) #Are we sure we don't need this?
-		login_form = driver.find_elements_by_xpath(fullXPath)
-		print("current_length:",len(login_form),"min_length:",n_videos)
 
+
+	last_height = driver.execute_script("return document.body.scrollHeight")
+	i = 0
+	while i < maxNScrolls:
+		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+		time.sleep(1)
+		new_height = driver.execute_script("return document.body.scrollHeight")
+		if new_height == last_height:
+			break
+		last_height = new_height
+		i += 1
 
 	login_form = driver.find_elements_by_xpath(fullXPath)
 	return login_form
