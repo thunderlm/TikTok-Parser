@@ -131,6 +131,8 @@ def get_stats_author(driver, authors_list, params, allStats, useTikster=True):
 			wait(driver, MAX_WAIT).until(lambda driver: len(driver.find_elements_by_class_name("number")) ==3)
 		except Exception as e:
 			print("Exception : " + str(e) + " " + str(authorName))
+			allStats[authorName] = dict()
+			allStats[authorName]["Candidate"] = False			
 			continue
 			
 		profileNumbers = driver.find_elements_by_class_name("number")
