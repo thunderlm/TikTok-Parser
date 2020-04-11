@@ -34,8 +34,8 @@ def main(verbose=False):
 			#Extract statistics from each author:		
 			stats_authors = sf.get_stats_author(driver, authors_list, params, stats_authors, useTikster=False)
 
-			#Compute metrics for each author:
-			metrics_author = sf.compute_metrics(stats_authors)
+		#Compute metrics for each author:
+		metrics_author = sf.compute_metrics(stats_authors)
 
 		#print(metrics_author)
 
