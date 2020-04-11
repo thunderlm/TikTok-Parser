@@ -9,8 +9,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
-from utils import extract_author_from_link, convertStatsToNumber
+from utils import extract_author_from_link, convertStatsToNumber, save_metrics
 import time 
+import json
 
 #	Global variables
 MAX_WAIT = 10
@@ -191,6 +192,8 @@ def compute_metrics(stats_authors):
 		stats_authors[authorName]["AverageLikes"] = float(authorStats["NLikes"])/authorStats["NVideos"]
 		stats_authors[authorName]["AverageViews"] = sum(authorStats["ViewsSerie"])/authorStats["NVideos"]
 			
+	save_metrics(stats_authors)		
+	   
 	return stats_authors
 
 def get_tikster_author(driver, authorName):

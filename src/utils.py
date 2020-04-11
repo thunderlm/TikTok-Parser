@@ -1,5 +1,6 @@
 import os
 import json
+import pandas
 
 def getPath():
 	path = os.getcwd()
@@ -41,3 +42,24 @@ def convertStatsToNumber(numbers):
 			numbers[i] = int(numbers[i])
 
 	return numbers
+
+def save_metrics(stats_authors, path_save="docs/result_metrics.json"):
+	#Save results in json file (for future handling)
+	with open(path_save, 'w') as f:
+		json.dump(stats_authors, f)
+
+	#Save results in xml file (for visualization)
+	data = pandas.read_json(path_save)
+	data_t = data.transpose()
+	data_t.to_excel(path_save.replace("json","xlsx"))
+	print("Results saved in", path_save.replace("json","xlsx"))
+	
+	
+	
+	
+	
+	
+	
+	
+
+
