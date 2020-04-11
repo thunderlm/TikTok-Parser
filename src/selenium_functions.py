@@ -102,29 +102,31 @@ def get_authors(login_form, verbose=False):
 	return list_authors
     
 
-def get_stats_author(driver, authors_list, params, allStats):
+def get_stats_author(driver, authors_list, params, allStats, useTikster=True):
 	
 	for authorName in authors_list:
 		#If author already in allStats, increase TagCount and skip to next:
 		if authorName in allStats and allStats[authorName]["Candidate"]:
 			allStats[authorName]["TagCount"] += 1
 			continue
+
+		print("Fetching info of ",authorName)
 		
 		# Try to use Tikster to send less requests to TikTok
-		success, vals = get_tikster_author(driver, authorName)
-		#If you managed to get it but didn't pass the tresholds, skip to next
-		if success :
-			numFollowing, numFollowers, numLikes = vals
-			if numFollowers < params["minNFollowers"] or numFollowers > params["maxNFollowers"] or numLikes < params["minNLikes"] or numLikes > params["maxNLikes"]:
-				allStats[authorName] = dict()
-				allStats[authorName]["Candidate"] = False
-				print("Skipped user thanks to Tikster")
-				continue			
+		if useTikster:
+			success, vals = get_tikster_author(driver, authorName)
+			#If you managed to get it but didn't pass the tresholds, skip to next
+			if success :
+				numFollowing, numFollowers, numLikes = vals
+				if numFollowers < params["minNFollowers"] or numFollowers > params["maxNFollowers"] or numLikes < params["minNLikes"] or numLikes > params["maxNLikes"]:
+					allStats[authorName] = dict()
+					allStats[authorName]["Candidate"] = False
+					print("Skipped user thanks to Tikster")
+					continue			
 		
 		# Request author page
 		driver.get('https://www.tiktok.com/@' + authorName)
 		
-		print("Fetching info of ",authorName)
 		# Get profile numbers like followers, following, likes
 		try:
 			wait(driver, MAX_WAIT).until(lambda driver: len(driver.find_elements_by_class_name("number")) ==3)
@@ -193,9 +195,12 @@ def compute_metrics(stats_authors):
 
 def get_tikster_author(driver, authorName):
 	fullXPath = "/html/body/div/div/div[2]/div[1]/div[2]/div/div/div/div"	
+	# Request author page
 	driver.get('https://app.tikster.net/#/user/' + authorName)	
 	try:
+		#Wait to see if can load (usually takes more than TikTok)
 		wait(driver, MAX_WAIT).until(EC.presence_of_element_located((By.XPATH, fullXPath+"[1]")))
+		#If it loads in time, extract the stats:
 		string = driver.find_elements_by_xpath(fullXPath+"[1]")[0].text
 		numFollowing = int(string[:string.find("\n")].replace(",","") )
 
@@ -204,10 +209,10 @@ def get_tikster_author(driver, authorName):
 
 		string = driver.find_elements_by_xpath(fullXPath+"[3]")[0].text
 		numLikes = int(string[:string.find("\n")].replace(",",""))
-		
-		print("Did it:",numFollowing, numFollowers, numLikes)
+
 		return True, [numFollowing, numFollowers, numLikes]
 		
 	except Exception as e:
+		#If not load in time, exit and go as usual
 		print("Tikster didn't load in time, falling back to TikTok")
 		return False, None

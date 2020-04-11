@@ -35,6 +35,8 @@ def convertStatsToNumber(numbers):
 			numbers[i] = int(float(numbers[i][:-1]) * 1e3)
 		elif numbers[i][-1] == "M":
 			numbers[i] = int(float(numbers[i][:-1]) * 1e6)
+		elif numbers[i][-1] == "B":
+			numbers[i] = int(float(numbers[i][:-1]) * 1e9)
 		else:
 			numbers[i] = int(numbers[i])
 
