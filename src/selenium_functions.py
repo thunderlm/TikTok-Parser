@@ -60,7 +60,7 @@ def scrollPage(driver, scope, maxNScrolls=10):
 	i = 0
 	while i < maxNScrolls:
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-		time.sleep(1)
+		time.sleep(2)
 		new_height = driver.execute_script("return document.body.scrollHeight")
 		if new_height == last_height:
 			break
@@ -144,7 +144,7 @@ def get_stats_author(driver, authors_list, params, allStats, useTikster=True):
 
 		# Get views:
         #TODO: Should scroll till the end
-		profileVideos = scrollPage(driver, scope="author", n=1) 
+		profileVideos = scrollPage(driver, scope="author", maxNScrolls=2) 
 		numberVideos = len(profileVideos)
 		viewsVideos = []
 		for video in profileVideos:
