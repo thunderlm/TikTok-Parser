@@ -73,6 +73,9 @@ def scrollPage(driver, scope, maxNScrolls=10):
 		 
 
 	login_form = driver.find_elements_by_xpath(fullXPath)
+	if scope == "author":
+		if len(login_form) == 0:
+			print("Mh non ha caricato nulla?",i)
 	return login_form
 
 
@@ -152,7 +155,7 @@ def get_stats_author(driver, authors_list, params, allStats, useTikster=True):
 
 		# Get views:
         #TODO: Should scroll till the end
-		profileVideos = scrollPage(driver, scope="author", maxNScrolls=2) 
+		profileVideos = scrollPage(driver, scope="author", maxNScrolls=20) 
 		numberVideos = len(profileVideos)
 		viewsVideos = []
 		for video in profileVideos:
@@ -188,7 +191,7 @@ def compute_metrics(stats_authors):
 	for authorName, authorStats in stats_authors.items():
 		stats_authors[authorName]["Following-Followers Ratio"] = divide(authorStats["Following"],authorStats["Followers"])
 		stats_authors[authorName]["TotViews"]	 = sum(authorStats["ViewsSerie"])
-		stats_authors[authorName]["Views-Followers Ratio"] = divide(authorStats["Followers"],authorStats["TotViews"])
+		stats_authors[authorName]["Views-Followers Ratio"] = divide(authorStats["TotViews"],authorStats["Followers"], round_result = False)
 		stats_authors[authorName]["AverageLikes"] = divide(authorStats["NLikes"],authorStats["NVideos"])
 		stats_authors[authorName]["AverageViews"] = divide(sum(authorStats["ViewsSerie"]),authorStats["NVideos"])
 			

@@ -32,7 +32,7 @@ def main(verbose=False):
 			authors_list = sf.get_authors(login_form)
 		
 			#Extract statistics from each author:		
-			stats_authors = sf.get_stats_author(driver, authors_list, params, stats_authors, useTikster=False)
+			stats_authors = sf.get_stats_author(driver, authors_list, params, stats_authors, useTikster=True)
 
 		#Compute metrics for each author:
 		metrics_author = sf.compute_metrics(stats_authors)
