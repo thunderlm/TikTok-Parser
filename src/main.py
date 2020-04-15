@@ -22,15 +22,16 @@ def main(verbose=False):
 
 		# Iterate over tags
 		for tagName in params["tags"]:
+			print("--------------- Starting tag "+tagName+ " ---------------")
 			# Get tag URL
 			driver.get('https://www.tiktok.com/tag/' + tagName)
 			
 			# Scroll in tags
-			login_form = sf.scrollPage(driver, scope="tag", maxNScrolls=50)
+			login_form, driver = sf.scrollPage(driver, scope="tag", maxNScrolls=50)
 		    
 		    #Get authors names:
-			authors_list = sf.get_authors(login_form)
-		
+			authors_list = sf.get_authors(login_form, driver)
+			print("--------------- Found ",len(authors_list),"users: ---------------")
 			#Extract statistics from each author:		
 			stats_authors = sf.get_stats_author(driver, authors_list, params, stats_authors, useTikster=True)
 

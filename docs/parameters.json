@@ -1,7 +1,7 @@
 {
-	"tags" : ["magic"],
-	"minNFollowers" : 5000,
-	"maxNFollowers" : 50000000000,
-	"minNLikes" : 5000,
-	"maxNLikes" : 100000000000
+	"tags" : ["咖啡","咖啡拉花","咖啡廳","咖啡師","手沖咖啡","團購"],
+	"minNFollowers" : 20000,
+	"maxNFollowers" : 250000,
+	"minNLikes" : 100,
+	"maxNLikes" : 3000000000000000
 }

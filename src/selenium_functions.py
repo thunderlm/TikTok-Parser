@@ -8,13 +8,55 @@ from selenium.webdriver.firefox.options import Options
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
-from utils import extract_author_from_link, convertStatsToNumber, save_metrics, divide
+from selenium.webdriver.common.keys import Keys
+from utils import convertStatsToNumber, save_metrics, divide
 import time 
 
 #	Global variables
 MAX_WAIT = 10
 
+def scroll_shim(passed_in_driver, objectt):
+        x = objectt.location['x']
+        y = objectt.location['y']
+        scroll_by_coord = 'window.scrollTo(%s,%s);' % (x,y)
+        scroll_nav_out_of_way = 'window.scrollBy(0, -120);'
+        passed_in_driver.execute_script(scroll_by_coord)
+        passed_in_driver.execute_script(scroll_nav_out_of_way)
+
+def extract_author_from_link(element, driver, link_video):
+	if "@" not in link_video:
+		print("WARNING: Could not find @ in link, retrying opening the video")
+
+		#Scroll, hover and click on the video
+		scroll_shim(driver, element)
+		actions = ActionChains(driver)
+		actions.move_to_element(element)
+		actions.click()
+		actions.perform()		
+		
+		#Stop a second for everything to load. Should be improved with a wait function?
+		time.sleep(1) 
+
+		#Get the information needed:
+		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div[2]/div/div[1]/div[2]"
+		element_target = driver.find_elements_by_xpath(fullXPath)
+		assert len(element_target) == 1
+		element_filtered = element_target[0].find_elements_by_tag_name('a') 
+		user_link = element_filtered[0].get_attribute('href') #Not sure why len>1
+		
+		#Press ESC to get out from video		
+		webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+#TODO: Add mechanism if for any reason it still does not work		
+		#Extract and return username:
+		author_name = user_link[user_link.find("@")+1:]
+		return author_name
+
+	else:
+		cropped_link = link_video[link_video.find("@")+1:]
+		author_name = cropped_link[:cropped_link.find("/")]
+		return author_name
 
 def getDriver(path):
 
@@ -64,7 +106,7 @@ def scrollPage(driver, scope, maxNScrolls=10):
 		new_height = driver.execute_script("return document.body.scrollHeight")
 		if new_height == last_height:
 			counter +=1
-			if counter>2:
+			if counter>3:
 				break
 		else:
 			counter = 0
@@ -76,10 +118,10 @@ def scrollPage(driver, scope, maxNScrolls=10):
 	if scope == "author":
 		if len(login_form) == 0:
 			print("Mh non ha caricato nulla?",i)
-	return login_form
+	return login_form, driver
 
 
-def get_authors(login_form, verbose=False):
+def get_authors(login_form, driver, verbose=False):
 	list_authors = []
 	for element in login_form:
 		#Currently the video link is in the element a
@@ -89,13 +131,9 @@ def get_authors(login_form, verbose=False):
 			raise ValueError('It was supposed to be only one element "a" ')
             
 		link_video = element_filtered[0].get_attribute('href')
-		author = extract_author_from_link(link_video)
-		#Add to author list if there was no problems extracting the name:
-		if author is not None:
-			list_authors.append(author)
-
-    #remove authors repetitions
-	#list_authors = list(set(list_authors)) 
+		author = extract_author_from_link(element, driver, link_video)
+		#Add to author list:
+		list_authors.append(author)
     
 	if verbose == True: 
 		for name_author in list_authors: print(name_author)
@@ -115,7 +153,8 @@ def get_stats_author(driver, authors_list, params, allStats, useTikster=True):
 		print("Fetching info of ",authorName)
 		
 		# Try to use Tikster to send less requests to TikTok
-		if useTikster:
+		# Skip if it is a special one, i.e. extracted from opening the video
+		if useTikster and authorName[-1] != "?": 
 			success, vals = get_tikster_author(driver, authorName)
 			#If you managed to get it but didn't pass the tresholds, skip to next
 			if success :
@@ -154,8 +193,7 @@ def get_stats_author(driver, authors_list, params, allStats, useTikster=True):
 			continue
 
 		# Get views:
-        #TODO: Should scroll till the end
-		profileVideos = scrollPage(driver, scope="author", maxNScrolls=20) 
+		profileVideos, _ = scrollPage(driver, scope="author", maxNScrolls=20) 
 		numberVideos = len(profileVideos)
 		viewsVideos = []
 		for video in profileVideos:

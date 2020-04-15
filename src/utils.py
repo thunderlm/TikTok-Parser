@@ -12,14 +12,6 @@ def loadJson(path):
 	with open(path) as json_file:
 		return json.load(json_file)
 
-def extract_author_from_link(link_video):
-	if "@" not in link_video:
-		print("WARNING: Could not find @ in link, hence no username")
-		return None
-	cropped_link = link_video[link_video.find("@")+1:]
-	author_name = cropped_link[:cropped_link.find("/")]
-	return author_name
-
 def getLinkVideos(page):
 	linkVideos = []
 	for element in page:
