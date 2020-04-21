@@ -1,7 +1,7 @@
 {
-	"tags" : ["咖啡","咖啡拉花","咖啡廳","咖啡師","手沖咖啡","團購"],
-	"minNFollowers" : 20000,
-	"maxNFollowers" : 250000,
+	"tags" : ["ootd","makeup","motd","lipstick","eyeshadow","shuuemura"],
+	"minNFollowers" : 15000,
+	"maxNFollowers" : 9000000000000,
 	"minNLikes" : 100,
 	"maxNLikes" : 3000000000000000
 }

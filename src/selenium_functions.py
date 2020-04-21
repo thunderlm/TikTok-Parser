@@ -42,16 +42,20 @@ def extract_author_from_link(element, driver, link_video):
 		#Get the information needed:
 		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div[2]/div/div[1]/div[2]"
 		element_target = driver.find_elements_by_xpath(fullXPath)
-		assert len(element_target) == 1
-		element_filtered = element_target[0].find_elements_by_tag_name('a') 
-		user_link = element_filtered[0].get_attribute('href') #Not sure why len>1
-		
-		#Press ESC to get out from video		
-		webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
-#TODO: Add mechanism if for any reason it still does not work		
-		#Extract and return username:
-		author_name = user_link[user_link.find("@")+1:]
-		return author_name
+		if len(element_target) == 1:
+			element_filtered = element_target[0].find_elements_by_tag_name('a') 
+			user_link = element_filtered[0].get_attribute('href') #Not sure why len>1
+			
+			#Press ESC to get out from video		
+			webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()	
+			#Extract and return username:
+			author_name = user_link[user_link.find("@")+1:]
+			return author_name
+		else:
+			#Press ESC to get out from video		
+			webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+			print("Did not manage to extract from video, proceeding to next user")
+			return None
 
 	else:
 		cropped_link = link_video[link_video.find("@")+1:]
@@ -93,6 +97,7 @@ def scrollPage(driver, scope, maxNScrolls=10):
 		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div/div"
 	elif scope == "author":
 		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div/div"
+		fullXPath = "/html/body/div[1]/div/div[2]/div/div[1]/div/main/div[2]/div"
 	else:
 		raise NameError('scope variable must be either tag or author')
 
@@ -133,7 +138,8 @@ def get_authors(login_form, driver, verbose=False):
 		link_video = element_filtered[0].get_attribute('href')
 		author = extract_author_from_link(element, driver, link_video)
 		#Add to author list:
-		list_authors.append(author)
+		if author is not None:
+			list_authors.append(author)
     
 	if verbose == True: 
 		for name_author in list_authors: print(name_author)
@@ -198,7 +204,7 @@ def get_stats_author(driver, authors_list, params, allStats, useTikster=True):
 		viewsVideos = []
 		for video in profileVideos:
 			views_count = video.find_elements_by_tag_name('span')
-			assert len(views_count) ==1
+			assert len(views_count) ==1 
 			string_number = views_count[0].text
 			converted_number = convertStatsToNumber([string_number])[0]
 			viewsVideos.append(converted_number)
